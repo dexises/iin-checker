@@ -10,13 +10,11 @@ type DatabaseConfiguration struct {
 	DSURL  string `long:"ds-url" env:"DATASTORE_URL" description:"DataStore URL" required:"false" default:"mongodb://localhost:27017"`
 }
 
-// Config holds application-wide settings.
 type Config struct {
 	Database DatabaseConfiguration
 	Port     string `long:"port" env:"PORT" description:"HTTP server port" required:"false" default:"8080"`
 }
 
-// Load parses flags and environment variables into Config.
 func Load() (*Config, error) {
 	var cfg Config
 	parser := flags.NewParser(&cfg, flags.Default)

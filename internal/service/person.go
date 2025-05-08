@@ -9,7 +9,6 @@ import (
 )
 
 type PersonService interface {
-	// ValidateIIN accepts a string IIN and returns date of birth, gender, ok flag, and error.
 	ValidateIIN(iin string) (time.Time, string, bool, error)
 
 	Create(ctx context.Context, req models.CreatePersonRequest) (string, error)
@@ -17,12 +16,10 @@ type PersonService interface {
 	FindByName(ctx context.Context, namePart string) ([]models.PersonDTO, error)
 }
 
-// personService is a concrete implementation of PersonService.
 type personService struct {
 	repo databases.PersonRepository
 }
 
-// NewPersonService constructs a PersonService with given repository.
 func NewPersonService(repo databases.PersonRepository) PersonService {
 	return &personService{repo: repo}
 }
@@ -32,16 +29,16 @@ func (s *personService) FindByName(ctx context.Context, namePart string) ([]mode
 	if err != nil {
 		return nil, err
 	}
+
 	out := make([]models.PersonDTO, len(persons))
 	for i, p := range persons {
 		out[i] = models.PersonDTO{IIN: p.IIN, Name: p.Name, Phone: p.Phone}
 	}
+
 	return out, nil
 }
 
-// ValidateIIN implements full IIN validation: format, date, gender, checksum.
 func (s *personService) ValidateIIN(iin string) (date time.Time, gender string, ok bool, err error) {
-	// Length check
 	if len(iin) != 12 {
 		err = errors.New("IIN должен содержать ровно 12 цифр")
 		return
@@ -114,20 +111,17 @@ func (s *personService) ValidateIIN(iin string) (date time.Time, gender string, 
 		}
 	}
 	// Final check digit
-	ok = (c == digits[11])
+	ok = c == digits[11]
 	return
 }
 
-// Create validates and persists a person record.
 func (s *personService) Create(ctx context.Context, req models.CreatePersonRequest) (string, error) {
-	// Validate IIN
 	if _, _, ok, err := s.ValidateIIN(req.IIN); err != nil || !ok {
 		if err != nil {
 			return "", err
 		}
 		return "", errors.New("invalid IIN")
 	}
-	// Check uniqueness
 	exists, err := s.repo.Exists(ctx, req.IIN)
 	if err != nil {
 		return "", err
@@ -135,26 +129,27 @@ func (s *personService) Create(ctx context.Context, req models.CreatePersonReque
 	if exists {
 		return "", errors.New("person with this IIN already exists")
 	}
-	// Persist entity
+
 	en := databases.Person{IIN: req.IIN, Name: req.Name, Phone: req.Phone}
 	if err := s.repo.Create(ctx, en); err != nil {
 		return "", err
 	}
+
 	return req.IIN, nil
 }
 
-// Get retrieves a person by IIN.
 func (s *personService) Get(ctx context.Context, iin string) (models.PersonDTO, error) {
-	// Validate IIN
 	if _, _, ok, err := s.ValidateIIN(iin); err != nil || !ok {
 		if err != nil {
 			return models.PersonDTO{}, err
 		}
 		return models.PersonDTO{}, errors.New("invalid IIN")
 	}
+
 	p, err := s.repo.Get(ctx, iin)
 	if err != nil {
 		return models.PersonDTO{}, err
 	}
+
 	return models.PersonDTO{IIN: p.IIN, Name: p.Name, Phone: p.Phone}, nil
 }

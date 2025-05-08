@@ -17,12 +17,10 @@ type Handler struct {
 	svc service.PersonService
 }
 
-// NewHandler creates a new Handler with provided service.
 func NewHandler(svc service.PersonService) *Handler {
 	return &Handler{svc: svc}
 }
 
-// CheckIINHandler handles POST /iin_check.
 func (h *Handler) CheckIINHandler(w http.ResponseWriter, r *http.Request) {
 	var req models.CheckIINRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -31,7 +29,6 @@ func (h *Handler) CheckIINHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Perform validation
 	date, gender, ok, err := h.svc.ValidateIIN(req.IIN)
 	if err != nil {
 		render.Status(r, http.StatusBadRequest)
@@ -44,7 +41,6 @@ func (h *Handler) CheckIINHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Successful validation
 	render.Status(r, http.StatusOK)
 	render.JSON(w, r, models.CheckIINResponse{
 		Valid:  true,
@@ -53,7 +49,6 @@ func (h *Handler) CheckIINHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// CreatePersonHandler handles POST /people/info.
 func (h *Handler) CreatePersonHandler(w http.ResponseWriter, r *http.Request) {
 	var req models.CreatePersonRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -90,7 +85,6 @@ func (h *Handler) SearchPersonHandler(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, persons)
 }
 
-// GetPersonHandler handles GET /people/info/{iin}.
 func (h *Handler) GetPersonHandler(w http.ResponseWriter, r *http.Request) {
 	iin := chi.URLParam(r, "iin")
 	person, err := h.svc.Get(r.Context(), iin)

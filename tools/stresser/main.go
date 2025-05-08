@@ -13,7 +13,6 @@ import (
 	"time"
 )
 
-// Person — payload для POST /people/info
 type Person struct {
 	IIN   string `json:"iin"`
 	Name  string `json:"name"`
