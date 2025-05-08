@@ -23,6 +23,19 @@ services:
     depends_on:
       - mongo
 
+  loader:
+    image: golang:1.20
+    container_name: iinservice_loader
+    working_dir: /app
+    volumes:
+      - ./:/app
+    command: [ "go", "run", "tools/stresser/main.go" ]
+    environment:
+      - WORKERS=10
+      - TOTAL_REQUESTS=100
+      - SERVICE_URL=http://app:8080
+    depends_on:
+      - app
 
 volumes:
   mongo_data:
