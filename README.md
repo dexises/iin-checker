@@ -131,11 +131,3 @@ GET /people/info/phone/{namePart}
 ```bash
 make compose-loader
 ```
-
-
-
----
-
-## 📖 License
-
-MIT © Your Name
